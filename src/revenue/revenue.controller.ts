@@ -27,7 +27,7 @@ export class RevenueController {
   }
 
   @UseGuards(AuthGuard)
-  @Get()
+  @Get("revenues-list")
   fetchingRevenue(@Req() req: any) {
     return this.revenueService.findRevenueTotal(req.user.sub)
   }

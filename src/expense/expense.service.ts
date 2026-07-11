@@ -25,7 +25,7 @@ export class ExpenseService {
   }
 
   async getExpenses(userId: string) {
-    const expenses = await this.expenseSchema.find({user: userId}).sort({ createdAt: -1 })
+    const expenses = await this.expenseSchema.find({ user: userId }).sort({ createdAt: -1 })
     return expenses
   }
 
@@ -75,106 +75,117 @@ export class ExpenseService {
   }
 
 
-    async financialStatements(userId: string) {
-      const expenses = await this.expenseSchema.find({
-        user: userId
-      });
-      const revenues = await this.revenueSchema.find({
-        user: userId
-      });
+  async financialStatements(userId: string) {
     
-      const cogs = expenses
-        .filter(e => e.categories.includes('COGS'))
-        .reduce((sum, e) => sum + e.amount, 0);
-    
-      const operatingExpenses = expenses
-        .filter(e => e.categories.includes('Operating_Expenses'))
-        .reduce((sum, e) => sum + e.amount, 0);
-    
-      const fixedExpenses = expenses
-        .filter(e => e.categories.includes('Fixed_Expenses'))
-        .reduce((sum, e) => sum + e.amount, 0);
-    
-      const variableExpenses = expenses
-        .filter(e => e.categories.includes('Variable_Expenses'))
-        .reduce((sum, e) => sum + e.amount, 0);
-    
-      const nonOperatingExpenses = expenses
-        .filter(e => e.categories.includes('Non_Operating_Expenses'))
-        .reduce((sum, e) => sum + e.amount, 0);
-    
-      const otherExpenses = expenses
-        .filter(e => e.categories.includes('Other_Expenses'))
-        .reduce((sum, e) => sum + e.amount, 0);
-    
-      const operatingRevenue = revenues
-        .filter(r => r.categories.includes('Operating_Revenue'))
-        .reduce((sum, r) => sum + r.amount, 0);
-    
-      const nonOperatingRevenue = revenues
-        .filter(r => r.categories.includes('Non_Operating_Revenue'))
-        .reduce((sum, r) => sum + r.amount, 0);
-    
-      const financialRevenue = revenues
-        .filter(r => r.categories.includes('Financial_Revenue'))
-        .reduce((sum, r) => sum + r.amount, 0);
-    
-      const otherRevenue = revenues
-        .filter(r => r.categories.includes('Other_Revenue'))
-        .reduce((sum, r) => sum + r.amount, 0);
-    
-      const grossProfit = operatingRevenue - cogs;
-    
-      const operatingProfit = grossProfit - operatingExpenses;
-    
-      const totalRevenue =
-        operatingRevenue +
-        nonOperatingRevenue +
-        financialRevenue +
-        otherRevenue;
-    
-      const totalExpenses =
-        cogs +
-        operatingExpenses +
-        fixedExpenses +
-        variableExpenses +
-        nonOperatingExpenses +
-        otherExpenses;
-    
-      const profitBeforeTax = totalRevenue - totalExpenses;
-    
-      const taxRate = profitBeforeTax < 500000 ? 0.05 : 0.2;
-    
-      const tax = profitBeforeTax * taxRate;
-    
-      const netProfit = profitBeforeTax - tax;
-    
-      return {
-        summary: {
-          grossProfit,
-          operatingProfit,
-          profitBeforeTax,
-          tax,
-          netProfit,
-        },
-    
-        revenue: {
-          operatingRevenue,
-          nonOperatingRevenue,
-          financialRevenue,
-          otherRevenue,
-          totalRevenue,
-        },
-    
-        expenses: {
-          cogs,
-          operatingExpenses,
-          fixedExpenses,
-          variableExpenses,
-          nonOperatingExpenses,
-          otherExpenses,
-          totalExpenses,
-        },
-      };
+    const expenses = await this.expenseSchema.find({
+      user: userId
+    });
+
+    const revenues = await this.revenueSchema.find({
+      user: userId
+    });
+
+    const cogs = expenses
+      .filter(e => e.categories.includes('COGS'))
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const operatingExpenses = expenses
+      .filter(e => e.categories.includes('Operating_Expenses'))
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const fixedExpenses = expenses
+      .filter(e => e.categories.includes('Fixed_Expenses'))
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const variableExpenses = expenses
+      .filter(e => e.categories.includes('Variable_Expenses'))
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const nonOperatingExpenses = expenses
+      .filter(e => e.categories.includes('Non_Operating_Expenses'))
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const otherExpenses = expenses
+      .filter(e => e.categories.includes('Other_Expenses'))
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const operatingRevenue = revenues
+      .filter(r => r.categories.includes('Operating_Revenue'))
+      .reduce((sum, r) => sum + r.amount, 0);
+
+    const nonOperatingRevenue = revenues
+      .filter(r => r.categories.includes('Non-Operating_Revenue'))
+      .reduce((sum, r) => sum + r.amount, 0);
+
+    const financialRevenue = revenues
+      .filter(r => r.categories.includes('Financial_Revenue'))
+      .reduce((sum, r) => sum + r.amount, 0);
+
+    const otherRevenue = revenues
+      .filter(r => r.categories.includes('Other_Revenue'))
+      .reduce((sum, r) => sum + r.amount, 0);
+
+    const grossProfit = operatingRevenue - cogs;
+
+    const operatingProfit = grossProfit - operatingExpenses;
+
+    const totalRevenue =
+      operatingRevenue +
+      nonOperatingRevenue +
+      financialRevenue +
+      otherRevenue;
+
+    const totalExpenses =
+      cogs +
+      operatingExpenses +
+      fixedExpenses +
+      variableExpenses +
+      nonOperatingExpenses +
+      otherExpenses;
+
+    let profitBeforeTax = totalRevenue - totalExpenses;
+
+    let taxRate = 0;
+
+    if (profitBeforeTax > 0 && profitBeforeTax < 500000) {
+      taxRate = 0.05;
+    } else if (profitBeforeTax >= 500000) {
+      taxRate = 0.20;
     }
+
+    const tax =
+      profitBeforeTax > 0
+        ? profitBeforeTax * taxRate
+        : 0;
+
+    const netProfit = profitBeforeTax - tax;
+
+    return {
+      summary: {
+        grossProfit,
+        operatingProfit,
+        profitBeforeTax,
+        tax,
+        netProfit,
+      },
+
+      revenue: {
+        operatingRevenue,
+        nonOperatingRevenue,
+        financialRevenue,
+        otherRevenue,
+        totalRevenue,
+      },
+
+      expenses: {
+        cogs,
+        operatingExpenses,
+        fixedExpenses,
+        variableExpenses,
+        nonOperatingExpenses,
+        otherExpenses,
+        totalExpenses,
+      },
+    };
+  }
 }

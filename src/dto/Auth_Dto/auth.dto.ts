@@ -27,7 +27,7 @@ export class AuthRegistrationDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(10000)
   aim: string
 
   @IsOptional()

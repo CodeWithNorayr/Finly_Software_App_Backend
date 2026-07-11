@@ -32,7 +32,7 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload);
 
     return {
-      _id: auth._id,
+      id: auth._id,
       firstname: auth.firstname,
       lastname: auth.lastname,
       email: auth.email,
@@ -59,7 +59,7 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload);
 
     return {
-      _id: auth._id,
+      id: auth._id,
       firstname: auth.firstname,
       lastname: auth.lastname,
       email: auth.email,
